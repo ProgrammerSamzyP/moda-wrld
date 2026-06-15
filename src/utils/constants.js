@@ -1,6 +1,30 @@
 export const PRODUCTS = [
   {
     id: 1,
+    name: "MODA STREET TEE",
+    price: 19200,
+    originalPrice: 25000,
+    category: "Vengeance Arc.26",
+    image: "/assets/streetTee.jpeg",
+    description: "Bold meets Boujee, period",
+    inStock: true,
+    badge: "Limited",
+    sizes: ["XS", "S", "M", "L", "XL", "XXL"]
+  },
+  {
+    id: 2,
+    name: "MODA CASH TEE",
+    price: 19200,
+    originalPrice: 25000,
+    category: "Vengeance Arc.26",
+    image: "/assets/cashTee.jpeg",
+    description: "Bold meets Boujee, period",
+    inStock: true,
+    badge: "Limited",
+    sizes: ["XS", "S", "M", "L", "XL", "XXL"]
+  },
+  {
+    id: 3,
     name: "MODA.EXE LONGSLEEVE",
     price: 28000,
     originalPrice: 35000,
@@ -12,7 +36,7 @@ export const PRODUCTS = [
     sizes: ["XS", "S", "M", "L", "XL", "XXL"]
   },
   {
-    id: 2,
+    id: 4,
     name: "DUAL REALITY TEE",
     price: 21600,
     originalPrice: 27000,
@@ -24,7 +48,7 @@ export const PRODUCTS = [
     sizes: ["XS", "S", "M", "L", "XL", "XXL"]
   },
   {
-    id: 3,
+    id: 5,
     name: "MODA BLACK NAIJA TEE",
     price: 20000,
     originalPrice: 25000,
@@ -36,7 +60,7 @@ export const PRODUCTS = [
     sizes: ["XS", "S", "M", "L", "XL", "XXL"]
   },
   {
-    id: 4,
+    id: 6,
     name: "MODA Bloody NAIJA TEE",
     price: 20000,
     originalPrice: 25000,
@@ -48,7 +72,7 @@ export const PRODUCTS = [
     sizes: ["XS", "S", "M", "L", "XL", "XXL"]
   },
   {
-    id: 5,
+    id: 7,
     name: "MODA WHITE NAIJA TEE",
     price: 20000,
     originalPrice: 25000,
@@ -60,7 +84,7 @@ export const PRODUCTS = [
     sizes: ["XS", "S", "M", "L", "XL", "XXL"]
   },
   {
-    id: 6,
+    id: 8,
     name: "MODA HERITAGE 61 SHORT",
     price: 24000,
     originalPrice: 30000,
@@ -72,7 +96,7 @@ export const PRODUCTS = [
     sizes: ["XS", "S", "M", "L", "XL", "XXL"]
   },
   {
-    id: 7,
+    id: 9,
     name: "MODA BABY LONGSLEEVE",
     price: 19200,
     originalPrice: 24000,
@@ -93,3 +117,11 @@ export const CATEGORIES = [
 
 export const WHATSAPP_NUMBER = "2349078859896";
 export const ADMIN_EMAIL = "modawrld61@gmail.com";
+
+// EmailJS configuration – replace with your real IDs and public key
+export const EMAIL_CONFIG = {
+  serviceId: 'service_v8v7leo',             // from EmailJS dashboard
+  ownerTemplateId: 'template_v0hlft4',
+  customerTemplateId: 'template_cg4y4fk',
+  publicKey: 'wCOUNbc7cXDBnJETR'              // from EmailJS Account → API Keys
+};

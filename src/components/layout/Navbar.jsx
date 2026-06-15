@@ -33,7 +33,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16 md:h-20">
           {/* Logo */}
           <Link to="/" className="flex-shrink-0">
-            <h1 className="text-2xl font-serif font-bold text-red-500">MODA WRLD</h1>
+            <img src="/assets/logo.jpeg" alt="MODA WRLD Logo" className="h-10 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}

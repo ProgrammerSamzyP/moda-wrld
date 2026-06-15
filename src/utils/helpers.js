@@ -20,3 +20,4 @@ export const formatDate = (date) => {
 export const generateOrderId = () => {
   return `MODA_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 };
+// Passkey-paystack: @modaOwner61
