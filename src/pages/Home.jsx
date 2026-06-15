@@ -49,8 +49,8 @@ const Home = () => {
         <div className="relative z-10 text-center text-white px-4 max-w-4xl mx-auto">
           <div className="animate-fade-in">
             <h1 className="font-serif text-4xl md:text-6xl lg:text-7xl font-bold mb-4">
-              <span className="text-white">MODA</span>{' '}
-              <span className="text-red-500">WRLD</span>
+              {/* <span className="text-white">MODA</span>{' '}
+              <span className="text-red-500">WRLD</span> */}
             </h1>
           </div>
           
