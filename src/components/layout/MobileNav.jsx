@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { FiHome, FiShoppingBag, FiHeart, FiUser } from 'react-icons/fi';
+import { FiHome, FiGrid, FiShoppingBag, FiUser } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 
@@ -8,12 +8,9 @@ const MobileNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const { cartCount, setIsCartOpen } = useCart();
+  const { cartCount } = useCart();
 
-  const isActive = (path) => {
-    if (path === '/cart') return false;
-    return location.pathname === path;
-  };
+  const isActive = (path) => location.pathname === path;
 
   const handleCartClick = (e) => {
     e.preventDefault();
@@ -21,7 +18,7 @@ const MobileNav = () => {
       navigate('/login');
       return;
     }
-    setIsCartOpen(true);
+    navigate('/cart');
   };
 
   const handleAccountClick = (e) => {
@@ -34,57 +31,62 @@ const MobileNav = () => {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 md:hidden safe-area-bottom">
-      <div className="flex justify-around items-center h-16">
+    <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
+      {/* Main bottom bar – dark glass */}
+      <div className="relative flex justify-around items-center h-16 bg-black/90 backdrop-blur-lg border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
         {/* Home */}
-        <Link 
-          to="/" 
-          className={`flex flex-col items-center justify-center w-full h-full ${
-            isActive('/') ? 'text-black' : 'text-gray-400'
+        <Link
+          to="/"
+          className={`flex flex-col items-center justify-center w-1/4 h-full transition-colors ${
+            isActive('/') ? 'text-red-500' : 'text-white/50 hover:text-white'
           }`}
         >
-          <FiHome className="text-lg mb-1" />
-          <span className="text-[10px] uppercase tracking-wider">Home</span>
+          <FiHome className="text-xl mb-0.5" />
+          <span className="text-[10px] uppercase tracking-wider font-medium">Home</span>
         </Link>
 
-        {/* Shop */}
-        <Link 
-          to="/shop" 
-          className={`flex flex-col items-center justify-center w-full h-full ${
-            isActive('/shop') ? 'text-black' : 'text-gray-400'
+        {/* Shop (now with distinct grid icon) */}
+        <Link
+          to="/shop"
+          className={`flex flex-col items-center justify-center w-1/4 h-full transition-colors ${
+            isActive('/shop') ? 'text-red-500' : 'text-white/50 hover:text-white'
           }`}
         >
-          <FiShoppingBag className="text-lg mb-1" />
-          <span className="text-[10px] uppercase tracking-wider">Shop</span>
+          <FiGrid className="text-xl mb-0.5" />
+          <span className="text-[10px] uppercase tracking-wider font-medium">Shop</span>
         </Link>
 
-        {/* Cart */}
-        <button 
-          onClick={handleCartClick}
-          className="flex flex-col items-center justify-center w-full h-full text-gray-400 relative"
-        >
-          <FiShoppingBag className="text-lg mb-1" />
-          <span className="text-[10px] uppercase tracking-wider">Cart</span>
-          {cartCount > 0 && (
-            <span className="absolute top-1 right-4 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-              {cartCount}
-            </span>
-          )}
-        </button>
+        {/* Empty spacer for the floating cart button */}
+        <div className="w-1/4 h-full" />
 
         {/* Account */}
-        <button 
+        <button
           onClick={handleAccountClick}
-          className={`flex flex-col items-center justify-center w-full h-full ${
-            isActive('/profile') || isActive('/login') ? 'text-black' : 'text-gray-400'
+          className={`flex flex-col items-center justify-center w-1/4 h-full transition-colors ${
+            isActive('/profile') || isActive('/login')
+              ? 'text-red-500'
+              : 'text-white/50 hover:text-white'
           }`}
         >
-          <FiUser className="text-lg mb-1" />
-          <span className="text-[10px] uppercase tracking-wider">
+          <FiUser className="text-xl mb-0.5" />
+          <span className="text-[10px] uppercase tracking-wider font-medium">
             {user ? 'Account' : 'Login'}
           </span>
         </button>
       </div>
+
+      {/* Floating Cart Button – centered, raised, with a glow */}
+      <button
+        onClick={handleCartClick}
+        className="absolute left-1/2 -translate-x-1/2 -top-6 w-16 h-16 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-red-500/40 active:scale-95 transition-transform border-[3px] border-black/90"
+      >
+        <FiShoppingBag className="text-2xl" />
+        {cartCount > 0 && (
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-red-500 text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-black/90 shadow">
+            {cartCount}
+          </span>
+        )}
+      </button>
     </div>
   );
 };

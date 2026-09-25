@@ -14,10 +14,11 @@ import Wishlist from './pages/Wishlist';
 import ProductDetail from './pages/ProductDetail';
 import Checkout from './pages/Checkout';
 import Admin from './pages/Admin';
+import Cart from './pages/Cart';
 
 function App() {
   // Set to true to lock the site, false to unlock
-  const [isSiteLocked, setIsSiteLocked] = useState(false);
+  const [isSiteLocked, setIsSiteLocked] = useState(true);
 
   // Show only the lock screen when the site is locked
   if (isSiteLocked) {
@@ -39,6 +40,8 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/orders" element={<Orders />} />
         <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/cart" element={<Cart />} />
+        {/* <Route path="/" element={<><Home /><Footer /></>} /> */}
         <Route path="/admin" element={<Admin />} />
       </Routes>
     </Layout>
