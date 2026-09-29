@@ -2,7 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Video background styles */
+/* ═══════════════════════════════════════════
+   GLOBAL RESET — kills default margins so the
+   fixed navbar sits flush with the video.
+═══════════════════════════════════════════ */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  overflow-x: hidden;
+  background: #000;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Remove default React/Vite App wrapper padding */
+.App {
+  padding: 0;
+  margin: 0;
+  text-align: inherit;
+}
+
+/* ═══════════════════════════════════════════
+   VIDEO BACKGROUND STYLES
+═══════════════════════════════════════════ */
 video {
   -webkit-backface-visibility: hidden;
   -moz-backface-visibility: hidden;
@@ -10,13 +50,14 @@ video {
   backface-visibility: hidden;
 }
 
-/* Smooth video loading */
 .video-loaded {
   opacity: 1;
   transition: opacity 1s ease-in-out;
 }
 
-/* Hero animations */
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -48,45 +89,6 @@ video {
   }
 }
 
-.animate-fade-in {
-  animation: fadeIn 0.8s ease-out forwards;
-}
-
-.animate-slide-up {
-  animation: slideUp 0.8s ease-out forwards;
-  opacity: 0;
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Mobile optimizations for video */
-@media (max-width: 768px) {
-  video {
-    object-position: center;
-  }
-}
-
-/* Hide scrollbar for cleaner look */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
-}
-
-/* Add these animations */
 @keyframes slideInRight {
   from {
     transform: translateX(100%);
@@ -105,6 +107,28 @@ video {
   }
 }
 
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 .animate-slide-in-right {
   animation: slideInRight 0.3s ease-out;
 }
@@ -113,7 +137,36 @@ video {
   animation: slideOutRight 0.3s ease-out;
 }
 
-/* Smooth scrollbar for cart drawer */
+/* ═══════════════════════════════════════════
+   MOBILE OPTIMIZATIONS
+═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  video {
+    object-position: center;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   SCROLLBARS
+═══════════════════════════════════════════ */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Cart drawer scrollbar */
 .cart-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
@@ -130,13 +183,4 @@ video {
 
 .cart-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #555;
-}
-
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }

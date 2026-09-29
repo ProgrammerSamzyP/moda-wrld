@@ -1,142 +1,149 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import ProductCard from '../components/shop/ProductCard';
-import { PRODUCTS } from '../utils/constants';
+// src/pages/Home.jsx
+import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Music, Pause } from 'lucide-react'
 
-const Home = () => {
-  const featuredProducts = PRODUCTS.slice(0, 4);
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+const INSTAGRAM_URL = 'https://www.instagram.com/mvdebymoda'
+
+function Home() {
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const audioRef = useRef(null)
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
+  // A detached <audio> keeps playing, so stop it when leaving the page
+  useEffect(() => {
+    const audio = audioRef.current
+    return () => audio?.pause()
+  }, [])
+
+  const toggleMusic = () => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    if (isPlaying) {
+      audio.pause()
+      setIsPlaying(false)
+    } else {
+      audio
+        .play()
+        .then(() => setIsPlaying(true))
+        .catch(() => setIsPlaying(false))
+    }
+  }
 
   return (
     <>
-      {/* Hero Section with Background Video */}
-      <section className="relative h-[90vh] md:h-screen flex items-center justify-center overflow-hidden bg-black">
-        {/* Background Video */}
+      <audio ref={audioRef} src="/assets/music.mp4" loop preload="none" />
+
+      {/* Fills the screen below the 4rem (h-16) sticky navbar */}
+      <section className="relative w-full overflow-hidden bg-black h-[calc(100dvh-4rem)] min-h-[480px]">
+        {/* Background video */}
         <video
           autoPlay
           muted
           loop
           playsInline
           preload="auto"
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${
-            isVideoLoaded ? 'opacity-90' : 'opacity-0'
-          }`}
-          onLoadedData={() => setIsVideoLoaded(true)}
           poster="/assets/hero-fallback.jpg"
+          onLoadedData={() => setIsVideoLoaded(true)}
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
+            isVideoLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
         >
-          <source src="/assets/modavidnew.mp4" type="video/mp4" />
+          <source src="/assets/herovid.mp4" type="video/mp4" />
           <source src="/assets/modavidnew.webm" type="video/webm" />
         </video>
 
-        {/* Fallback Image */}
+        {/* Fallback image while the video loads */}
         {!isVideoLoaded && (
           <div
             className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url('/assets/hero-fallback.jpg')` }}
+            style={{ backgroundImage: "url('/assets/hero-fallback.jpg')" }}
           />
         )}
 
-        {/* Overlay with red-tinted gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/40 z-10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-transparent to-red-500/10 z-10" />
+        {/* Overlay: slightly darkened so the button always reads */}
+        <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/60 via-black/20 to-black/20" />
 
-        {/* Hero Content */}
-        <div className="relative z-20 text-center text-white px-4 max-w-5xl mx-auto">
-          <div className="animate-fade-in space-y-4 md:space-y-6">
-            {/* Brand Name */}
-            {/* <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight">
-              <span className="text-white drop-shadow-lg">MODA</span>{' '}
-              <span className="text-red-500 drop-shadow-lg">WRLD</span>
-            </h1> */}
+        {/* Hero content, centred */}
+        <div className="relative z-20 mx-auto flex h-full max-w-7xl flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
+          <Link
+            to="/shop"
+            className="inline-flex items-center justify-center rounded-none border border-white bg-transparent px-10 py-4 text-sm font-black uppercase tracking-[0.3em] text-white no-underline backdrop-blur-[2px] transition-all duration-300 hover:bg-white hover:text-black active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:px-12 sm:py-5 sm:text-base"
+          >
+            ENTER
+          </Link>
+        </div>
 
-            {/* Tagline */}
-            {/* <p className="text-sm md:text-lg text-gray-300 max-w-xl mx-auto font-light tracking-wider uppercase">
-              Premium Streetwear • Crafted for the Bold
-            </p> */}
+        {/* Music toggle, bottom-right, safe-area aware */}
+        <div
+          className="absolute right-4 z-30 sm:right-6 lg:right-8"
+          style={{ bottom: 'max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem))' }}
+        >
+          <button
+            type="button"
+            onClick={toggleMusic}
+            aria-label={isPlaying ? 'Pause music' : 'Play music'}
+            aria-pressed={isPlaying}
+            className={`relative flex h-12 w-12 items-center justify-center rounded-full border text-white backdrop-blur-md shadow-[0_8px_30px_rgba(0,0,0,0.35)] transition-all duration-500 ease-out hover:scale-105 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white sm:h-14 sm:w-14 ${
+              isVideoLoaded ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'
+            } ${
+              isPlaying
+                ? 'border-white/30 bg-white/15'
+                : 'border-white/20 bg-white/10 hover:bg-white/20'
+            }`}
+          >
+            {isPlaying && (
+              <>
+                <span className="absolute inset-0 rounded-full border border-white/30 animate-ping [animation-duration:2.2s]" />
+                <span className="absolute inset-0 rounded-full border border-white/20 animate-ping [animation-duration:2.2s] [animation-delay:0.6s]" />
+              </>
+            )}
 
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Link
-                to="/shop"
-                className="group relative inline-block bg-red-500 text-white px-10 py-5 font-bold uppercase tracking-widest text-sm overflow-hidden rounded-md"
-              >
-                <span className="relative z-10">Shop Collection</span>
-                <div className="absolute inset-0 bg-white transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-                <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                {/* <span className="relative z-10 group-hover:text-black">Shop Collection</span> */}
-              </Link>
-              
-            </div>
-          </div>
+            <span className="relative flex h-5 w-5 items-center justify-center">
+              <Music
+                strokeWidth={1.8}
+                className={`absolute h-5 w-5 transition-all duration-300 ${
+                  isPlaying ? 'scale-75 rotate-12 opacity-0' : 'scale-100 rotate-0 opacity-100'
+                }`}
+              />
+              <Pause
+                strokeWidth={1.8}
+                className={`absolute h-5 w-5 transition-all duration-300 ${
+                  isPlaying ? 'scale-100 rotate-0 opacity-100' : 'scale-75 -rotate-12 opacity-0'
+                }`}
+              />
+            </span>
+
+            {isPlaying && (
+              <span className="absolute -top-2.5 left-1/2 flex h-2.5 -translate-x-1/2 items-end gap-[3px]">
+                {[0, 180, 360].map((delay) => (
+                  <span
+                    key={delay}
+                    className="w-[2.5px] rounded-full bg-white/80 animate-[eqBar_0.9s_ease-in-out_infinite]"
+                    style={{ animationDelay: `${delay}ms` }}
+                  />
+                ))}
+              </span>
+            )}
+          </button>
         </div>
       </section>
 
-      {/* Categories Section – Black background */}
-      <section className="py-16 md:py-24 bg-black text-white px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="font-serif text-3xl md:text-5xl font-bold mb-4">
-              The <span className="text-red-500">Collection</span>
-            </h2>
-            <div className="w-20 h-1 bg-red-500 mx-auto mb-4" />
-            <p className="text-gray-400 text-sm md:text-base max-w-md mx-auto">
-              Two distinct lines. One identity.
-            </p>
-          </div>
+      {/* No footer here: the app layout already mounts the global <Footer /> */}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 max-w-5xl mx-auto">
-            {/* LH4H */}
-            <Link
-              to="/shop?category=LH4H"
-              className="group relative h-72 md:h-[28rem] overflow-hidden rounded-2xl shadow-2xl"
-            >
-              <img
-                src="/assets/LH4H-IMG.jpeg"
-                alt="LH4H Collection"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-              <div className="absolute inset-0 flex flex-col items-center justify-end pb-10 md:pb-14">
-                <h3 className="text-4xl md:text-5xl font-serif font-bold text-white mb-2 border-b-2 border-red-500 pb-2">
-                  LH4H
-                </h3>
-                <span className="text-sm uppercase tracking-[.3em] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  Explore Collection →
-                </span>
-              </div>
-            </Link>
-
-            {/* Vengeance Arc.26 */}
-            <Link
-              to="/shop?category=Vengeance Arc.26"
-              className="group relative h-72 md:h-[28rem] overflow-hidden rounded-2xl shadow-2xl"
-            >
-              <img
-                src="/assets/V.arc-img.jpeg"
-                alt="Vengeance Arc.26 Collection"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
-              <div className="absolute inset-0 flex flex-col items-center justify-end pb-10 md:pb-14">
-                <h3 className="text-4xl md:text-5xl font-serif font-bold text-white mb-2 border-b-2 border-red-500 pb-2">
-                  Vengeance Arc.26
-                </h3>
-                <span className="text-sm uppercase tracking-[.3em] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                  Explore Collection →
-                </span>
-              </div>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Latest Drops – White background with black text */}
-      
-
-      {/* Features / Brand Values – Black background */}
-     
+      <style>{`
+        @keyframes eqBar {
+          0%, 100% { height: 3px; }
+          50% { height: 10px; }
+        }
+      `}</style>
     </>
-  );
-};
+  )
+}
 
-export default Home;
+export default Home

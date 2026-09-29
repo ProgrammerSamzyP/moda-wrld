@@ -1,118 +1,165 @@
+/*
+  HOW TO ADD MORE IMAGES TO A PRODUCT
+  1. Put the files in /public/assets (e.g. /public/assets/riot-back.jpeg)
+  2. Add the path to that product's `images` array below.
+  The first image is the main one. `image` is used on shop cards,
+  `images` is used on the product detail page.
+*/
+
 export const PRODUCTS = [
   {
     id: 1,
-    name: "MODA STREET TEE",
+    name: "MODA RIOT TEE",
     price: 19200,
-    originalPrice: 25000,
-    category: "Vengeance Arc.26",
-    image: "/assets/streetTee.jpeg",
-    description: "Bold meets Boujee, period",
+    originalPrice: 29999,
+    image: "/assets/riot.jpeg",
+    images: [
+      "/assets/riot.jpeg",
+      "/assets/riot1.jpeg",
+      "/assets/riot2.jpeg",
+      "/assets/riot3.jpeg",
+    ],
+    description: "Washed Material DTF print",
     inStock: true,
-    badge: "Limited",
+    // badge: "Limited",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"]
   },
   {
     id: 2,
-    name: "MODA CASH TEE",
+    name: "MODAxELITE8 TEE (BLACK)",
     price: 19200,
-    originalPrice: 25000,
-    category: "Vengeance Arc.26",
-    image: "/assets/cashTee.jpeg",
-    description: "Bold meets Boujee, period",
+    originalPrice: 24999,
+    image: "/assets/elite1.jpeg",
+    images: [
+      "/assets/elite1.jpeg",
+      "/assets/elite2.jpeg",
+    ],
+    description: "100% cotton DTF Print",
     inStock: true,
-    badge: "Limited",
+    // badge: "Limited",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"]
   },
   {
     id: 3,
-    name: "MODA.EXE LONGSLEEVE",
+    name: "MODAxELITE8 TEE (WHITE)",
     price: 28000,
-    originalPrice: 35000,
-    category: "Vengeance Arc.26",
-    image: "/assets/Product-one.jpeg",
-    description: 'MODA.exe long sleeves feature "Moda 2026" in bold black, white, and red.',
+    originalPrice: 24999,
+    image: "/assets/modaE.jpeg",
+    images: [
+      "/assets/modaE.jpeg",
+      "/assets/modaE1.jpeg",
+    ],
+    description: '100% cotton DTF Print',
     inStock: true,
-    badge: "Best Seller",
+    // badge: "Best Seller",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"]
   },
   {
     id: 4,
-    name: "DUAL REALITY TEE",
+    name: "MODA BB JERSEY",
     price: 21600,
-    originalPrice: 27000,
-    category: "Vengeance Arc.26",
-    image: "/assets/Product-two.jpeg",
-    description: "Oversized fit, fleece-lined interior.",
+    originalPrice: 34999,
+    image: "/assets/jersey.jpeg",
+    images: [
+      "/assets/jersey.jpeg",
+      "/assets/jersey1.jpeg",
+      "/assets/jersey2.jpeg",
+      "/assets/jersey3.jpeg",
+    ],
+    description: "100% cotton DTF and Screen Print, net material",
     inStock: true,
-    badge: "New",
+    // badge: "New",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"]
   },
   {
     id: 5,
-    name: "MODA BLACK NAIJA TEE",
+    name: "MODA RYU TANKS (WHITE)",
     price: 20000,
-    originalPrice: 25000,
-    category: "LH4H",
-    image: "/assets/Product-three.jpeg",
-    description: "MODA BLACK NAIJA TEE all about that hustle.",
+    originalPrice: 25999,
+    image: "/assets/ryu.jpeg",
+    images: [
+      "/assets/ryu.jpeg",
+      "/assets/ryu1.jpeg",
+      "/assets/ryu2.jpeg",
+    ],
+    description: "100% cotton Sublimation print",
     inStock: true,
-    badge: "New",
+    // badge: "New",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"]
   },
   {
     id: 6,
-    name: "MODA Bloody NAIJA TEE",
+    name: "MODA RYU TANKS (RED)",
     price: 20000,
-    originalPrice: 25000,
-    category: "LH4H",
-    image: "/assets/Product-four.jpeg",
-    description: "Tribute to the sacrifice and blood that built the Naija spirit.",
+    originalPrice: 25999,
+    image: "/assets/ryuR.jpeg",
+    images: [
+      "/assets/ryuR.jpeg",
+      "/assets/ryuR1.jpeg",
+      "/assets/ryuR2.jpeg",
+      "/assets/ryuR3.jpeg",
+    ],
+    description: "100% cotton Sublimation print",
     inStock: true,
-    badge: "Best Seller",
+    // badge: "Best Seller",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"]
   },
   {
     id: 7,
-    name: "MODA WHITE NAIJA TEE",
+    name: "MODA GRAFFITI SHORT",
     price: 20000,
-    originalPrice: 25000,
-    category: "LH4H",
-    image: "/assets/Product-five.jpeg",
-    description: "MODA WHITE NAIJA TEE all about that hustle.",
+    originalPrice: 34999,
+    image: "/assets/short.jpeg",
+    images: [
+      "/assets/short.jpeg",
+      "/assets/short1.jpeg",
+      "/assets/short2.jpeg",
+      "/assets/short3.jpeg",
+
+    ],
+    description: "Mesh material DTF print",
     inStock: true,
-    badge: "New",
+    // badge: "New",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"]
   },
   {
     id: 8,
-    name: "MODA HERITAGE 61 SHORT",
+    name: "MODA 61 SWEAT (GRAY)",
     price: 24000,
-    originalPrice: 30000,
-    category: "Vengeance Arc.26",
-    image: "/assets/Product-six.jpeg",
-    description: "MODA HERITAGE 61 shorts pay homage to the legacy of the 61 frat.",
+    originalPrice: 54999,
+    image: "/assets/Gray.jpeg",
+    images: [
+      "/assets/Gray.jpeg",
+      "/assets/gray1.jpeg",
+      "/assets/gray2.jpeg",
+      "/assets/gray3.jpeg",
+    ],
+    description: "",
     inStock: true,
-    badge: "New",
+    // badge: "New",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"]
   },
   {
     id: 9,
-    name: "MODA BABY LONGSLEEVE",
+    name: "MODA 61 SWEAT (BLACK)",
     price: 19200,
-    originalPrice: 24000,
-    category: "Vengeance Arc.26",
-    image: "/assets/Product-seven.jpeg",
+    originalPrice: 54999,
+    image: "/assets/black.jpeg",
+    images: [
+      "/assets/black.jpeg",
+      "/assets/black1.jpeg",
+      "/assets/black2.jpeg",
+      "/assets/black3.jpeg",
+    ],
     description: "Bold meets Boujee, period",
     inStock: true,
-    badge: "Limited",
+    // badge: "Limited",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"]
   }
 ];
 
 export const CATEGORIES = [
-  { id: 'all', name: 'All Products' },
-  { id: 'LH4H', name: 'LH4H' },
-  { id: 'Vengeance Arc.26', name: 'Vengeance Arc.26' }
+  { id: 'all', name: 'All Products' }
 ];
 
 export const WHATSAPP_NUMBER = "2349078859896";

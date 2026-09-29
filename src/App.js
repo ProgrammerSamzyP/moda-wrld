@@ -18,7 +18,7 @@ import Cart from './pages/Cart';
 
 function App() {
   // Set to true to lock the site, false to unlock
-  const [isSiteLocked, setIsSiteLocked] = useState(true);
+  const [isSiteLocked, setIsSiteLocked] = useState(false);
 
   // Show only the lock screen when the site is locked
   if (isSiteLocked) {

@@ -1,23 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  FiCreditCard,
-  FiTruck,
   FiCheck,
-  FiUser,
-  FiMail,
-  FiPhone,
-  FiMapPin,
   FiAlertCircle,
   FiArrowLeft,
   FiShoppingBag,
+  FiLock,
+  FiMapPin,
 } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { saveOrder } from '../services/firebase';
 import { formatCurrency, generateOrderId } from '../utils/helpers';
 import { PRODUCTS } from '../utils/constants';
-import { sendOrderEmails } from '../services/email'; // ← external email function
+import { sendOrderEmails } from '../services/email';
+
+// ---------- Design tokens (LITGANG-inspired: black / white / pink) ----------
+const PINK = 'bg-[#FF4F9A]';
+const heading = 'font-black uppercase tracking-tight';
+const label = 'block text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2';
+const inputClass = (err) =>
+  `w-full bg-white border px-4 py-3.5 text-sm text-black outline-none transition-colors placeholder:text-gray-400 focus:border-black ${
+    err ? 'border-red-600' : 'border-gray-300'
+  }`;
+
+// Defined outside Checkout so inputs don't remount (and lose focus) on each keystroke
+const Field = ({ name, children, error }) => (
+  <div>
+    <label className={label}>{name}</label>
+    {children}
+    {error && <p className="text-red-600 text-xs mt-1.5 font-medium">{error}</p>}
+  </div>
+);
 
 // Complete list of Nigerian states
 const NIGERIAN_STATES = [
@@ -26,7 +40,7 @@ const NIGERIAN_STATES = [
   'Gombe', 'Imo', 'Jigawa', 'Kaduna', 'Kano', 'Katsina', 'Kebbi',
   'Kogi', 'Kwara', 'Lagos', 'Nasarawa', 'Niger', 'Ogun', 'Ondo',
   'Osun', 'Oyo', 'Plateau', 'Rivers', 'Sokoto', 'Taraba', 'Yobe',
-  'Zamfara', 'Abuja (FCT)', 'Other'
+  'Zamfara', 'Abuja (FCT)', 'Other',
 ];
 
 const DELIVERY_FEES = {
@@ -62,7 +76,7 @@ const Checkout = () => {
 
   // Calculate subtotal using original prices
   const subtotalOriginal = cart.reduce((sum, item) => {
-    const product = PRODUCTS.find(p => p.id === item.id);
+    const product = PRODUCTS.find((p) => p.id === item.id);
     const price = product?.originalPrice || item.price;
     return sum + price * item.quantity;
   }, 0);
@@ -151,7 +165,6 @@ const Checkout = () => {
 
       // Send emails using the external function
       sendOrderEmails({ ...orderData, firebaseId: docId });
-
     } catch (err) {
       console.error('❌ Error saving order:', err);
       try {
@@ -169,7 +182,6 @@ const Checkout = () => {
 
         // Send emails even when falling back to localStorage
         sendOrderEmails(orderData);
-
       } catch (storageError) {
         setError('Failed to save order. Contact support with reference: ' + reference);
       }
@@ -232,388 +244,303 @@ const Checkout = () => {
     return () => {};
   }, []);
 
+  const set = (key) => (e) => setShipping({ ...shipping, [key]: e.target.value });
+
   // ---------- RENDER ----------
   if (cart.length === 0 && !orderSuccess) {
     return (
-      <div className="min-h-screen pt-28 pb-20 flex items-center justify-center bg-gray-50">
-        <div className="text-center px-4">
-          <div className="text-7xl mb-5">🛒</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h1>
-          <p className="text-gray-500 mb-8">Add some items to get started</p>
+      <div className="min-h-screen pt-28 pb-20 flex items-center justify-center bg-white">
+        <div className="text-center px-4 max-w-md">
+          <h1 className={`${heading} text-4xl text-black mb-3`}>Your cart is empty</h1>
+          <p className="text-gray-500 mb-8">Nothing here yet. Check out the current drop.</p>
           <button
             onClick={() => navigate('/shop')}
-            className="inline-flex items-center gap-2 bg-black text-white px-8 py-3 rounded-xl font-bold hover:bg-gray-800 transition-all shadow-md"
+            className="inline-flex items-center gap-2 bg-black text-white px-10 py-4 font-bold uppercase tracking-widest text-sm hover:bg-[#FF4F9A] hover:text-black transition-colors"
           >
-            <FiShoppingBag /> Continue Shopping
+            <FiShoppingBag /> Shop Now
           </button>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50 pt-24 pb-20">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        {orderSuccess && orderDetails ? (
-          /* SUCCESS PAGE */
-          <div className="text-center animate-fade-in">
-            <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <FiCheck className="text-5xl text-emerald-600" />
+  // ---------- SUCCESS ----------
+  if (orderSuccess && orderDetails) {
+    return (
+      <div className="min-h-screen bg-white pt-24 pb-20">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6">
+          <div className="bg-black text-white p-8 sm:p-10 mb-0">
+            <div className={`w-12 h-12 ${PINK} flex items-center justify-center mb-6`}>
+              <FiCheck className="text-2xl text-black" />
             </div>
-            <h1 className="text-3xl font-serif font-bold text-gray-900 mb-2">Payment Successful!</h1>
-            <p className="text-gray-500 mb-10">Your order has been placed successfully.</p>
-
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-8 text-left max-w-lg mx-auto">
-              <h2 className="font-bold text-lg mb-5 text-gray-900">Order Receipt</h2>
-              <div className="space-y-3 text-sm">
-                {[
-                  ['Order ID', orderDetails.orderId],
-                  ['Date', new Date(orderDetails.date).toLocaleDateString()],
-                  ['Customer', orderDetails.customerName],
-                  ['Email', orderDetails.customerEmail],
-                  ['Phone', orderDetails.customer?.phone],
-                  ['Delivery Address', `${orderDetails.customer?.address}, ${orderDetails.customer?.city}, ${orderDetails.customer?.state}`],
-                ].map(([label, value]) => (
-                  <div key={label} className="flex justify-between">
-                    <span className="text-gray-500">{label}</span>
-                    <span className="font-medium text-gray-900 text-right max-w-[220px]">{value}</span>
-                  </div>
-                ))}
-
-                <div className="border-t pt-4 mt-4">
-                  <h3 className="font-semibold mb-2">Items ({orderDetails.items?.length})</h3>
-                  {orderDetails.items?.map((item, idx) => (
-                    <div key={idx} className="flex justify-between py-1">
-                      <span className="text-gray-600">{item.name} x{item.quantity} ({item.size})</span>
-                      <span className="font-medium">{formatCurrency(item.price * item.quantity)}</span>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="border-t pt-4 mt-4 space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Subtotal</span>
-                    <span>{formatCurrency(orderDetails.subtotal)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Delivery</span>
-                    <span className={orderDetails.deliveryFee === 0 ? 'text-emerald-600 font-medium' : ''}>
-                      {orderDetails.deliveryFee === 0 ? 'Free' : formatCurrency(orderDetails.deliveryFee)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between font-bold text-lg pt-2 border-t">
-                    <span>Total</span>
-                    <span className="text-red-500">{formatCurrency(orderDetails.total)}</span>
-                  </div>
-                </div>
-
-                <div className="border-t pt-4 mt-4 text-xs text-gray-500 space-y-1">
-                  <p>Payment Method: {orderDetails.paymentMethod?.toUpperCase()}</p>
-                  <p>Payment Ref: {orderDetails.paymentReference}</p>
-                  <div className="flex items-center gap-2">
-                    Status:
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-semibold uppercase tracking-wide">
-                      {orderDetails.status}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
-              <button onClick={() => navigate('/orders')} className="flex-1 bg-black text-white py-3 rounded-xl font-bold hover:bg-gray-800 transition-all">
-                View My Orders
-              </button>
-              <button onClick={() => navigate('/shop')} className="flex-1 border-2 border-gray-300 text-gray-700 py-3 rounded-xl font-bold hover:border-gray-400 transition-all">
-                Continue Shopping
-              </button>
-            </div>
+            <h1 className={`${heading} text-4xl sm:text-5xl leading-none`}>You're in the Geng.</h1>
+            <p className="text-gray-400 mt-4">
+              Payment received. A confirmation is on its way to {orderDetails.customerEmail}.
+            </p>
           </div>
-        ) : (
-          <>
-            {/* Progress Steps */}
-            <div className="flex items-center justify-center mb-10">
-              {['Shipping', 'Payment', 'Confirmation'].map((label, idx) => (
-                <div key={idx} className="flex items-center">
-                  <div
-                    className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm transition-all ${
-                      idx + 1 <= step ? 'bg-black text-white shadow-md' : 'bg-white text-gray-400 border-2 border-gray-200'
-                    }`}
-                  >
-                    {idx + 1 < step ? <FiCheck className="text-lg" /> : idx + 1}
-                  </div>
-                  <span className="ml-3 text-sm font-semibold text-gray-700 hidden sm:block">{label}</span>
-                  {idx < 2 && (
-                    <div className={`w-12 sm:w-16 h-1 mx-2 rounded-full transition-all ${idx + 1 < step ? 'bg-black' : 'bg-gray-200'}`} />
-                  )}
+
+          <div className="border border-black border-t-0 p-6 sm:p-8 text-sm">
+            <h2 className={`${heading} text-lg mb-5`}>Order receipt</h2>
+
+            <dl className="space-y-3">
+              {[
+                ['Order ID', orderDetails.orderId],
+                ['Date', new Date(orderDetails.date).toLocaleDateString()],
+                ['Customer', orderDetails.customerName],
+                ['Email', orderDetails.customerEmail],
+                ['Phone', orderDetails.customer?.phone],
+                ['Delivery to', `${orderDetails.customer?.address}, ${orderDetails.customer?.city}, ${orderDetails.customer?.state}`],
+              ].map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-6">
+                  <dt className="text-gray-500">{k}</dt>
+                  <dd className="font-semibold text-black text-right break-all sm:break-normal max-w-[260px]">{v}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <div className="border-t border-gray-200 pt-5 mt-6">
+              <h3 className="font-bold uppercase tracking-widest text-[11px] text-gray-500 mb-3">
+                Items ({orderDetails.items?.length})
+              </h3>
+              {orderDetails.items?.map((item, idx) => (
+                <div key={idx} className="flex justify-between py-1.5">
+                  <span className="text-gray-700">
+                    {item.name} × {item.quantity}
+                    {item.size ? ` (${item.size})` : ''}
+                  </span>
+                  <span className="font-semibold">{formatCurrency(item.price * item.quantity)}</span>
                 </div>
               ))}
             </div>
 
-            {error && (
-              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 text-red-700">
-                <FiAlertCircle className="text-lg mt-0.5" />
-                <span className="text-sm">{error}</span>
+            <div className="border-t border-gray-200 pt-5 mt-5 space-y-2">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Subtotal</span>
+                <span>{formatCurrency(orderDetails.subtotal)}</span>
               </div>
-            )}
+              <div className="flex justify-between">
+                <span className="text-gray-500">Delivery</span>
+                <span className="font-semibold">
+                  {orderDetails.deliveryFee === 0 ? 'Free' : formatCurrency(orderDetails.deliveryFee)}
+                </span>
+              </div>
+              <div className="flex justify-between text-lg font-black pt-3 border-t border-black">
+                <span className="uppercase">Total</span>
+                <span>{formatCurrency(orderDetails.total)}</span>
+              </div>
+            </div>
 
-            {/* STEP 1: Shipping */}
+            <div className="border-t border-gray-200 pt-5 mt-6 text-xs text-gray-500 space-y-1.5">
+              <p>Payment method: {orderDetails.paymentMethod?.toUpperCase()}</p>
+              <p className="break-all">Payment ref: {orderDetails.paymentReference}</p>
+              <p className="flex items-center gap-2">
+                Status:
+                <span className={`${PINK} text-black px-2 py-0.5 font-bold uppercase tracking-widest`}>
+                  {orderDetails.status}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <button
+              onClick={() => navigate('/orders')}
+              className="flex-1 bg-black text-white py-4 font-bold uppercase tracking-widest text-sm hover:bg-[#FF4F9A] hover:text-black transition-colors"
+            >
+              View my orders
+            </button>
+            <button
+              onClick={() => navigate('/shop')}
+              className="flex-1 border border-black text-black py-4 font-bold uppercase tracking-widest text-sm hover:bg-black hover:text-white transition-colors"
+            >
+              Keep shopping
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ---------- CHECKOUT ----------
+  const steps = ['Shipping', 'Payment', 'Confirmation'];
+  const zones = [
+    { value: 'abuad', label: 'ABUAD Campus', price: '₦3,000' },
+    { value: 'lagos', label: 'Lagos / Ibadan', price: '₦5,000' },
+    { value: 'other', label: 'Other States', price: '₦8,000' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-white pt-24 pb-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header + steps */}
+        <div className="mb-10">
+          <h1 className={`${heading} text-4xl md:text-5xl text-black`}>Checkout</h1>
+          <ol className="flex items-center gap-2 sm:gap-4 mt-6 text-xs font-bold uppercase tracking-widest">
+            {steps.map((s, idx) => {
+              const n = idx + 1;
+              const done = n < step;
+              const active = n === step;
+              return (
+                <li key={s} className="flex items-center gap-2 sm:gap-4">
+                  <span
+                    className={`w-7 h-7 flex items-center justify-center text-[11px] ${
+                      done ? `${PINK} text-black` : active ? 'bg-black text-white' : 'border border-gray-300 text-gray-400'
+                    }`}
+                  >
+                    {done ? <FiCheck /> : n}
+                  </span>
+                  <span className={`hidden sm:block ${active ? 'text-black' : 'text-gray-400'}`}>{s}</span>
+                  {idx < 2 && <span className={`w-6 sm:w-12 h-px ${done ? 'bg-black' : 'bg-gray-300'}`} />}
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-4 border border-red-600 bg-red-50 flex items-start gap-3 text-red-700">
+            <FiAlertCircle className="text-lg mt-0.5 shrink-0" />
+            <span className="text-sm">{error}</span>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-14">
+          {/* LEFT: steps */}
+          <div className="lg:col-span-3">
             {step === 1 && (
-              <div className="animate-fade-in">
-                <div className="flex items-center gap-3 mb-6">
-                  <FiTruck className="text-2xl text-red-500" />
-                  <h2 className="text-2xl font-serif font-bold text-gray-900">Shipping Details</h2>
+              <form onSubmit={handleShippingSubmit} noValidate>
+                <h2 className={`${heading} text-2xl mb-6`}>Shipping details</h2>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                  <Field name="First name" error={fieldErrors.firstName}>
+                    <input type="text" value={shipping.firstName} onChange={set('firstName')} placeholder="John" className={inputClass(fieldErrors.firstName)} />
+                  </Field>
+                  <Field name="Last name" error={fieldErrors.lastName}>
+                    <input type="text" value={shipping.lastName} onChange={set('lastName')} placeholder="Doe" className={inputClass(fieldErrors.lastName)} />
+                  </Field>
                 </div>
 
-                <form onSubmit={handleShippingSubmit} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
-                    {/* First Name */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">First Name *</label>
-                      <div className="relative">
-                        <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input
-                          type="text"
-                          value={shipping.firstName}
-                          onChange={(e) => setShipping({ ...shipping, firstName: e.target.value })}
-                          placeholder="John"
-                          className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition ${fieldErrors.firstName ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
-                        />
-                      </div>
-                      {fieldErrors.firstName && <p className="text-red-500 text-xs mt-1">{fieldErrors.firstName}</p>}
-                    </div>
-                    {/* Last Name */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">Last Name *</label>
-                      <div className="relative">
-                        <FiUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input
-                          type="text"
-                          value={shipping.lastName}
-                          onChange={(e) => setShipping({ ...shipping, lastName: e.target.value })}
-                          placeholder="Doe"
-                          className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition ${fieldErrors.lastName ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
-                        />
-                      </div>
-                      {fieldErrors.lastName && <p className="text-red-500 text-xs mt-1">{fieldErrors.lastName}</p>}
-                    </div>
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+                  <Field name="Email" error={fieldErrors.email}>
+                    <input type="email" value={shipping.email} onChange={set('email')} placeholder="you@example.com" className={inputClass(fieldErrors.email)} />
+                  </Field>
+                  <Field name="Phone" error={fieldErrors.phone}>
+                    <input type="tel" value={shipping.phone} onChange={set('phone')} placeholder="08012345678" className={inputClass(fieldErrors.phone)} />
+                  </Field>
+                </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
-                    {/* Email */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email *</label>
-                      <div className="relative">
-                        <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input
-                          type="email"
-                          value={shipping.email}
-                          onChange={(e) => setShipping({ ...shipping, email: e.target.value })}
-                          placeholder="you@example.com"
-                          className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition ${fieldErrors.email ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
-                        />
-                      </div>
-                      {fieldErrors.email && <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>}
-                    </div>
-                    {/* Phone */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">Phone *</label>
-                      <div className="relative">
-                        <FiPhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                        <input
-                          type="tel"
-                          value={shipping.phone}
-                          onChange={(e) => setShipping({ ...shipping, phone: e.target.value })}
-                          placeholder="08012345678"
-                          className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition ${fieldErrors.phone ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
-                        />
-                      </div>
-                      {fieldErrors.phone && <p className="text-red-500 text-xs mt-1">{fieldErrors.phone}</p>}
-                    </div>
-                  </div>
+                <div className="mb-5">
+                  <Field name="Delivery address" error={fieldErrors.address}>
+                    <textarea
+                      rows={3}
+                      value={shipping.address}
+                      onChange={set('address')}
+                      placeholder="House number, street name, landmark"
+                      className={`${inputClass(fieldErrors.address)} resize-none`}
+                    />
+                  </Field>
+                </div>
 
-                  {/* Address */}
-                  <div className="mb-5">
-                    <label className="block text-sm font-semibold text-gray-700 mb-1.5">Delivery Address *</label>
-                    <div className="relative">
-                      <FiMapPin className="absolute left-3 top-4 text-gray-400" />
-                      <textarea
-                        rows={3}
-                        value={shipping.address}
-                        onChange={(e) => setShipping({ ...shipping, address: e.target.value })}
-                        placeholder="House number, street name, landmark..."
-                        className={`w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition resize-none ${fieldErrors.address ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
-                      />
-                    </div>
-                    {fieldErrors.address && <p className="text-red-500 text-xs mt-1">{fieldErrors.address}</p>}
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
+                  <Field name="City" error={fieldErrors.city}>
+                    <input type="text" value={shipping.city} onChange={set('city')} placeholder="Ikeja" className={inputClass(fieldErrors.city)} />
+                  </Field>
+                  <Field name="State" error={fieldErrors.state}>
+                    <select value={shipping.state} onChange={set('state')} className={inputClass(fieldErrors.state)}>
+                      <option value="">Select state</option>
+                      {NIGERIAN_STATES.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </Field>
+                </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
-                    {/* City */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">City *</label>
-                      <input
-                        type="text"
-                        value={shipping.city}
-                        onChange={(e) => setShipping({ ...shipping, city: e.target.value })}
-                        placeholder="Ikeja"
-                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition ${fieldErrors.city ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
-                      />
-                      {fieldErrors.city && <p className="text-red-500 text-xs mt-1">{fieldErrors.city}</p>}
-                    </div>
-                    {/* State - improved dropdown */}
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">State *</label>
-                      <select
-                        value={shipping.state}
-                        onChange={(e) => setShipping({ ...shipping, state: e.target.value })}
-                        className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition bg-white ${fieldErrors.state ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
-                      >
-                        <option value="">Select State</option>
-                        {NIGERIAN_STATES.map((state) => (
-                          <option key={state} value={state}>
-                            {state}
-                          </option>
-                        ))}
-                      </select>
-                      {fieldErrors.state && <p className="text-red-500 text-xs mt-1">{fieldErrors.state}</p>}
-                    </div>
-                  </div>
-
-                  {/* Location Type */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-semibold text-gray-700 mb-3">Delivery Zone</label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {[
-                        { value: 'abuad', label: 'ABUAD Campus', price: '₦3,000' },
-                        { value: 'lagos', label: 'Lagos / Ibadan', price: '₦5,000' },
-                        { value: 'other', label: 'Other States', price: '₦8,000' },
-                      ].map((opt) => (
+                <div className="mb-8">
+                  <span className={label}>Delivery zone</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {zones.map((opt) => {
+                      const selected = shipping.locationType === opt.value;
+                      return (
                         <label
                           key={opt.value}
-                          className={`flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer transition-all ${
-                            shipping.locationType === opt.value
-                              ? 'border-red-500 bg-red-50 shadow-sm'
-                              : 'border-gray-200 hover:border-gray-300'
+                          className={`cursor-pointer p-4 border transition-colors ${
+                            selected ? 'border-black bg-black text-white' : 'border-gray-300 hover:border-black'
                           }`}
                         >
-                          <div className="flex items-center gap-3">
-                            <input
-                              type="radio"
-                              name="locationType"
-                              value={opt.value}
-                              checked={shipping.locationType === opt.value}
-                              onChange={(e) => setShipping({ ...shipping, locationType: e.target.value })}
-                              className="w-4 h-4 text-red-500"
-                            />
-                            <span className="text-sm font-medium">{opt.label}</span>
-                          </div>
-                          <span className="text-xs text-gray-500">{opt.price}</span>
+                          <input
+                            type="radio"
+                            name="locationType"
+                            value={opt.value}
+                            checked={selected}
+                            onChange={set('locationType')}
+                            className="sr-only"
+                          />
+                          <span className="block text-sm font-bold">{opt.label}</span>
+                          <span className={`block text-xs mt-1 ${selected ? 'text-[#FF4F9A]' : 'text-gray-500'}`}>{opt.price}</span>
                         </label>
-                      ))}
-                    </div>
-                    {subtotalOriginal >= 50000 && (
-                      <div className="mt-3 bg-emerald-50 border border-emerald-200 rounded-xl p-3 flex items-center gap-2 text-emerald-700 text-sm">
-                        <span>🎉</span> Your order qualifies for <strong className="ml-1">free delivery</strong>!
-                      </div>
-                    )}
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-wider hover:bg-gray-800 transition-all flex items-center justify-center gap-2 shadow-md"
-                  >
-                    Continue to Payment
-                  </button>
-                </form>
-              </div>
-            )}
-
-            {/* STEP 2: Payment */}
-            {step === 2 && (
-              <div className="animate-fade-in">
-                <div className="flex items-center gap-3 mb-6">
-                  <FiCreditCard className="text-2xl text-red-500" />
-                  <h2 className="text-2xl font-serif font-bold text-gray-900">Payment</h2>
-                </div>
-
-                {/* Order Summary */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-                  <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                    <FiShoppingBag className="text-gray-600" /> Order Summary
-                  </h3>
-
-                  <div className="bg-gray-50 rounded-xl p-4 mb-5">
-                    <div className="flex items-start gap-3">
-                      <FiMapPin className="text-gray-400 mt-0.5" />
-                      <div className="text-sm">
-                        <p className="font-semibold text-gray-900">{shipping.firstName} {shipping.lastName}</p>
-                        <p className="text-gray-600">{shipping.address}</p>
-                        <p className="text-gray-600">{shipping.city}, {shipping.state}</p>
-                        <p className="text-gray-500">{shipping.phone}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3 mb-5">
-                    {cart.map((item) => {
-                      const product = PRODUCTS.find(p => p.id === item.id);
-                      const price = product?.originalPrice || item.price;
-                      return (
-                        <div key={`${item.id}-${item.size}`} className="flex justify-between items-center text-sm py-2 border-b border-gray-100">
-                          <div className="flex-1 pr-4">
-                            <p className="font-medium text-gray-900">{item.name} <span className="text-gray-500">×{item.quantity}</span></p>
-                            {item.size && <p className="text-xs text-gray-400">Size: {item.size}</p>}
-                          </div>
-                          <span className="font-semibold">{formatCurrency(price * item.quantity)}</span>
-                        </div>
                       );
                     })}
                   </div>
-
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Subtotal</span>
-                      <span className="font-medium">{formatCurrency(subtotalOriginal)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Delivery</span>
-                      <span className={deliveryFee === 0 ? 'text-emerald-600 font-medium' : 'font-medium'}>
-                        {deliveryFee === 0 ? 'Free' : formatCurrency(deliveryFee)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200">
-                      <span>Total</span>
-                      <span className="text-red-500">{formatCurrency(total)}</span>
-                    </div>
-                  </div>
+                  {subtotalOriginal >= 50000 && (
+                    <p className={`mt-3 ${PINK} text-black text-sm font-bold px-4 py-3`}>
+                      Free delivery unlocked on this order.
+                    </p>
+                  )}
                 </div>
 
-                {/* Paystack Info */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-                  <h3 className="font-bold text-lg mb-2">Pay with Paystack</h3>
-                  <p className="text-gray-500 text-sm mb-4">Secure payment via card, bank transfer, USSD, or bank app.</p>
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-xs text-yellow-800 flex items-center gap-2">
-                    🔒 Your payment is protected by 256-bit SSL encryption.
-                  </div>
-                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-black text-white py-4 font-bold uppercase tracking-widest text-sm hover:bg-[#FF4F9A] hover:text-black transition-colors"
+                >
+                  Continue to payment
+                </button>
+              </form>
+            )}
 
-                <div className="flex gap-4">
+            {step === 2 && (
+              <div>
+                <h2 className={`${heading} text-2xl mb-6`}>Payment</h2>
+
+                <div className="border border-gray-300 p-5 mb-6 flex items-start gap-3">
+                  <FiMapPin className="text-gray-400 mt-0.5 shrink-0" />
+                  <div className="text-sm flex-1">
+                    <p className="font-bold text-black">{shipping.firstName} {shipping.lastName}</p>
+                    <p className="text-gray-600">{shipping.address}</p>
+                    <p className="text-gray-600">{shipping.city}, {shipping.state}</p>
+                    <p className="text-gray-500">{shipping.phone} · {shipping.email}</p>
+                  </div>
                   <button
                     onClick={() => setStep(1)}
-                    className="flex items-center justify-center gap-2 px-6 py-4 border-2 border-gray-300 text-gray-700 rounded-xl font-bold uppercase hover:bg-gray-50 transition-all"
+                    className="text-xs font-bold uppercase tracking-widest underline underline-offset-4 hover:text-[#FF4F9A]"
+                  >
+                    Edit
+                  </button>
+                </div>
+
+                <div className="border border-black p-5 mb-8">
+                  <h3 className="font-black uppercase tracking-tight text-lg mb-1">Pay with Paystack</h3>
+                  <p className="text-gray-600 text-sm mb-4">Card, bank transfer, USSD or bank app.</p>
+                  <p className="text-xs text-gray-500 flex items-center gap-2">
+                    <FiLock /> Payments are encrypted and processed by Paystack.
+                  </p>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setStep(1)}
+                    className="flex items-center justify-center gap-2 px-6 py-4 border border-black text-black font-bold uppercase tracking-widest text-sm hover:bg-black hover:text-white transition-colors"
                   >
                     <FiArrowLeft /> Back
                   </button>
                   <button
                     onClick={handlePayment}
                     disabled={loading}
-                    className="flex-1 bg-black text-white py-4 rounded-xl font-bold uppercase hover:bg-gray-800 transition-all disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 bg-black text-white py-4 font-bold uppercase tracking-widest text-sm hover:bg-[#FF4F9A] hover:text-black transition-colors disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {loading ? (
                       <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Processing...
+                        <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        Processing
                       </>
                     ) : (
                       `Pay ${formatCurrency(total)}`
@@ -622,8 +549,54 @@ const Checkout = () => {
                 </div>
               </div>
             )}
-          </>
-        )}
+          </div>
+
+          {/* RIGHT: persistent order summary */}
+          <aside className="lg:col-span-2">
+            <div className="bg-black text-white p-6 sm:p-8 lg:sticky lg:top-28">
+              <h2 className={`${heading} text-xl mb-6`}>Your order</h2>
+
+              <ul className="space-y-5 mb-6">
+                {cart.map((item) => {
+                  const product = PRODUCTS.find((p) => p.id === item.id);
+                  const price = product?.originalPrice || item.price;
+                  return (
+                    <li key={`${item.id}-${item.size}`} className="flex gap-4">
+                      <div className="relative w-16 h-20 bg-neutral-800 shrink-0">
+                        {item.image && <img src={item.image} alt={item.name} className="w-full h-full object-cover" />}
+                        <span className={`absolute -top-2 -right-2 ${PINK} text-black text-[11px] font-black w-5 h-5 flex items-center justify-center`}>
+                          {item.quantity}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0 text-sm">
+                        <p className="font-bold truncate">{item.name}</p>
+                        {item.size && <p className="text-xs text-gray-400 mt-0.5">Size {item.size}</p>}
+                      </div>
+                      <span className="text-sm font-semibold">{formatCurrency(price * item.quantity)}</span>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              <div className="border-t border-neutral-700 pt-5 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Subtotal</span>
+                  <span>{formatCurrency(subtotalOriginal)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Delivery</span>
+                  <span className={deliveryFee === 0 ? 'text-[#FF4F9A] font-bold' : ''}>
+                    {deliveryFee === 0 ? 'Free' : formatCurrency(deliveryFee)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-lg font-black pt-4 mt-2 border-t border-neutral-700">
+                  <span className="uppercase">Total</span>
+                  <span>{formatCurrency(total)}</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
     </div>
   );

@@ -1,54 +1,126 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiHeart } from 'react-icons/fi';
+import { FiHeart, FiPlus } from 'react-icons/fi';
 import { useCart } from '../../context/CartContext';
 import { formatCurrency } from '../../utils/helpers';
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, onQuickView }) => {
   const { wishlist, toggleWishlist } = useCart();
+
+  const images = product.images?.length ? product.images : [product.image];
+  const hoverImage = images[1];
   const isWishlisted = wishlist.includes(product.id);
+  const soldOut = product.inStock === false;
+  const colors = Array.isArray(product.colors) ? product.colors : [];
+  const isSale = /sale/i.test(product.badge || '');
+
+  const quickView = (e) => {
+    e.preventDefault();
+    onQuickView?.(product);
+  };
 
   return (
-    <div className="group bg-white rounded-lg overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-shadow duration-300">
-      <div className="relative overflow-hidden aspect-[3/4] bg-gray-100">
-        <Link to={`/product/${product.id}`}>
+    <article className="group">
+      {/* Image */}
+      <div className="relative aspect-[3/4] overflow-hidden bg-neutral-100">
+        <Link to={`/product/${product.id}`} aria-label={product.name} className="block h-full w-full">
           <img
-            src={product.image}
+            src={images[0]}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            loading="lazy"
+            className={`h-full w-full object-cover transition-all duration-700 ${
+              hoverImage ? 'group-hover:opacity-0' : 'group-hover:scale-[1.03]'
+            } ${soldOut ? 'opacity-70' : ''}`}
           />
+          {hoverImage && (
+            <img
+              src={hoverImage}
+              alt=""
+              aria-hidden="true"
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-700 group-hover:opacity-100"
+            />
+          )}
         </Link>
-        {product.badge && (
-          <div className="absolute top-2 left-2 z-10 bg-red-500 text-white px-2 py-1 text-xs font-bold uppercase rounded">
-            {product.badge}
-          </div>
+
+        {/* Badge */}
+        {(soldOut || product.badge) && (
+          <span
+            className={`pointer-events-none absolute left-2 top-2 px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${
+              soldOut
+                ? 'bg-white text-black'
+                : isSale
+                ? 'bg-red-600 text-white'
+                : 'bg-black text-white'
+            }`}
+          >
+            {soldOut ? 'Sold out' : product.badge}
+          </span>
         )}
+
+        {/* Wishlist */}
         <button
+          type="button"
           onClick={() => toggleWishlist(product.id)}
-          className={`absolute top-2 right-2 z-10 w-8 h-8 rounded-full flex items-center justify-center shadow-md bg-white/90 ${
-            isWishlisted ? 'text-red-500' : 'text-gray-400 hover:text-red-500'
-          }`}
+          aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+          aria-pressed={isWishlisted}
+          className="absolute right-1.5 top-1.5 flex h-10 w-10 items-center justify-center rounded-full text-black transition-transform active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
         >
-          <FiHeart className={isWishlisted ? 'fill-current' : ''} />
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur">
+            <FiHeart className={`h-4 w-4 ${isWishlisted ? 'fill-red-600 text-red-600' : ''}`} />
+          </span>
         </button>
+
+        {/* Quick view: bar on desktop hover, round button on touch screens */}
+        {onQuickView && !soldOut && (
+          <>
+            <button
+              type="button"
+              onClick={quickView}
+              className="absolute inset-x-0 bottom-0 hidden translate-y-full bg-white/95 py-3 text-xs font-bold uppercase tracking-[0.15em] text-black transition-transform duration-300 group-hover:translate-y-0 focus:translate-y-0 md:block"
+            >
+              Quick view
+            </button>
+            <button
+              type="button"
+              onClick={quickView}
+              aria-label={`Quick view ${product.name}`}
+              className="absolute bottom-2 right-2 flex h-10 w-10 items-center justify-center rounded-full bg-white text-black shadow-md active:scale-90 transition-transform md:hidden"
+            >
+              <FiPlus className="h-5 w-5" />
+            </button>
+          </>
+        )}
       </div>
-      <div className="p-3 md:p-4">
-        <p className="text-xs text-gray-400 uppercase tracking-widest mb-1">
-          {product.category}
-        </p>
+
+      {/* Info */}
+      <div className="pt-3">
         <Link to={`/product/${product.id}`}>
-          <h3 className="font-serif text-sm md:text-base font-bold text-black mb-1 hover:text-red-500 transition-colors">
+          <h3 className="text-[11px] font-semibold uppercase leading-snug tracking-[0.06em] text-black sm:text-xs">
             {product.name}
           </h3>
         </Link>
-        {/* Display original price only */}
-        <div className="flex items-center gap-2 mb-1">
-          <span className="text-black font-bold text-sm">
-            {formatCurrency(product.originalPrice)}
-          </span>
-        </div>
+        <p className="mt-1 text-xs text-neutral-600 sm:text-sm">
+          {formatCurrency(product.originalPrice ?? product.price)}
+        </p>
+
+        {colors.length > 1 && (
+          <div className="mt-2 flex items-center gap-1.5" aria-label={`Available in ${colors.length} colors`}>
+            {colors.slice(0, 4).map((c) => (
+              <span
+                key={c}
+                title={c}
+                className="h-3 w-3 rounded-full border border-neutral-300"
+                style={{ backgroundColor: String(c).toLowerCase().replace(/\s+/g, '') }}
+              />
+            ))}
+            {colors.length > 4 && (
+              <span className="text-[10px] text-neutral-500">+{colors.length - 4}</span>
+            )}
+          </div>
+        )}
       </div>
-    </div>
+    </article>
   );
 };
 

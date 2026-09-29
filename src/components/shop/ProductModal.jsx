@@ -1,158 +1,192 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiHeart } from 'react-icons/fi';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useUIContext } from '../../context/UIContext';
-import { useCartContext } from '../../context/CartContext';
-import { formatCurrency, calculateDiscount } from '../../utils/helpers';
-import { WHATSAPP_CONFIG } from '../../utils/constants';
+import { useCart } from '../../context/CartContext';
+import { formatCurrency } from '../../utils/helpers';
+import { WHATSAPP_NUMBER } from '../../utils/constants';
 
 const ProductModal = () => {
   const { isProductModalOpen, selectedProduct, closeProductModal } = useUIContext();
-  const { addToCart, wishlist, toggleWishlist } = useCartContext();
+  const { addToCart, wishlist, toggleWishlist } = useCart();
   const [selectedSize, setSelectedSize] = useState('');
+  const [sizeError, setSizeError] = useState(false);
 
-  if (!selectedProduct) return null;
+  const open = Boolean(isProductModalOpen && selectedProduct);
 
-  const isWishlisted = wishlist.includes(selectedProduct.id);
-  const discountPercent = calculateDiscount(selectedProduct.price, selectedProduct.originalPrice);
-  const isSoldOut = !selectedProduct.inStock;
+  // Fresh state for each product
+  useEffect(() => {
+    setSelectedSize('');
+    setSizeError(false);
+  }, [selectedProduct?.id]);
+
+  // Lock scroll + Escape to close
+  useEffect(() => {
+    if (!open) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e) => e.key === 'Escape' && closeProductModal();
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [open, closeProductModal]);
+
+  const p = selectedProduct;
+  const soldOut = p ? p.inStock === false : false;
+  const isWishlisted = p ? wishlist.includes(p.id) : false;
+  const image = p ? (p.images?.length ? p.images[0] : p.image) : '';
 
   const handleAddToCart = () => {
     if (!selectedSize) {
-      toast.error('Please select a size');
+      setSizeError(true);
       return;
     }
-    addToCart(selectedProduct, selectedSize);
+    addToCart(p, selectedSize);
     closeProductModal();
   };
 
   return (
     <AnimatePresence>
-      {isProductModalOpen && (
+      {open && (
         <motion.div
+          key="product-modal"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-end md:items-center justify-center"
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[60] flex items-end justify-center md:items-center md:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label={p.name}
         >
-          {/* Backdrop */}
           <div
-            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"
             onClick={closeProductModal}
+            aria-hidden="true"
           />
 
-          {/* Modal */}
           <motion.div
-            initial={{ y: 100, opacity: 0 }}
+            initial={{ y: 48, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            className="relative bg-white rounded-t-2xl md:rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+            exit={{ y: 48, opacity: 0 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            className="relative w-full max-w-4xl overflow-y-auto overscroll-contain bg-white shadow-2xl max-h-[92dvh] rounded-t-2xl md:max-h-[85vh] md:rounded-none"
+            style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
           >
-            {/* Close Button */}
             <button
+              type="button"
               onClick={closeProductModal}
-              className="absolute top-4 right-4 z-10 w-10 h-10 bg-white/90 backdrop-blur rounded-full flex items-center justify-center hover:bg-gray-100 shadow-lg"
+              aria-label="Close quick view"
+              className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 shadow-md transition-transform active:scale-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-black"
             >
-              <FiX className="text-xl" />
+              <FiX className="h-5 w-5" />
             </button>
 
-            <div className="grid md:grid-cols-2 gap-0">
+            <div className="grid md:grid-cols-2">
               {/* Image */}
-              <div className="h-64 md:h-auto bg-gray-100 md:aspect-square">
-                <img
-                  src={selectedProduct.image}
-                  alt={selectedProduct.name}
-                  className="w-full h-full object-cover"
-                />
+              <div className="h-[44vh] bg-neutral-100 md:h-full md:min-h-[520px]">
+                <img src={image} alt={p.name} className="h-full w-full object-cover" />
               </div>
 
               {/* Details */}
-              <div className="p-4 md:p-8 lg:p-12 flex flex-col justify-center">
-                <div className="flex justify-between items-start mb-2">
-                  <p className="text-red-500 uppercase tracking-widest text-xs font-bold">
-                    {selectedProduct.category}
-                  </p>
+              <div className="flex flex-col p-5 sm:p-6 md:p-8 lg:p-10">
+                <div className="flex items-start justify-between gap-3">
+                  <h2 className="text-lg font-black uppercase leading-tight tracking-[-0.01em] text-black sm:text-xl md:text-2xl">
+                    {p.name}
+                  </h2>
                   <button
-                    onClick={() => toggleWishlist(selectedProduct.id)}
-                    className={`text-2xl ${isWishlisted ? 'text-red-500' : 'text-gray-300'}`}
+                    type="button"
+                    onClick={() => toggleWishlist(p.id)}
+                    aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+                    aria-pressed={isWishlisted}
+                    className="mt-0.5 shrink-0 p-1 md:mr-10"
                   >
-                    <FiHeart className={isWishlisted ? 'fill-current' : ''} />
+                    <FiHeart
+                      className={`h-5 w-5 ${isWishlisted ? 'fill-red-600 text-red-600' : 'text-neutral-400'}`}
+                    />
                   </button>
                 </div>
 
-                <h2 className="font-serif text-2xl md:text-3xl lg:text-4xl font-bold text-black mb-2 md:mb-4">
-                  {selectedProduct.name}
-                </h2>
-
-                <div className="flex items-center gap-2 mb-4">
-                  <p className="text-xl md:text-2xl font-bold text-black">
-                    {formatCurrency(selectedProduct.price)}
-                  </p>
-                  {selectedProduct.originalPrice && (
-                    <>
-                      <p className="text-sm text-gray-400 line-through">
-                        {formatCurrency(selectedProduct.originalPrice)}
-                      </p>
-                      <span className="discount-badge">-{discountPercent}% OFF</span>
-                    </>
-                  )}
-                </div>
-
-                <p className="text-gray-600 mb-6 md:mb-8 leading-relaxed text-sm md:text-base">
-                  {selectedProduct.description}
+                <p className="mt-2 text-base font-semibold text-black md:text-lg">
+                  {formatCurrency(p.originalPrice ?? p.price)}
                 </p>
 
-                {isSoldOut ? (
-                  <div className="space-y-3">
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2 text-sm">
-                      <span className="font-bold">Out of Stock</span>
+                {p.description && (
+                  <p className="mt-4 text-sm leading-relaxed text-neutral-600">
+                    {p.description}
+                  </p>
+                )}
+
+                <div className="mt-6">
+                  {soldOut ? (
+                    <div className="space-y-3">
+                      <p className="text-sm font-semibold text-red-600">Sold out</p>
+                      <a
+                        href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                          `Hi Moda Wrld, is ${p.name} available?`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex w-full items-center justify-center gap-2 border border-black py-3.5 text-xs font-bold uppercase tracking-[0.15em] text-black transition-colors hover:bg-black hover:text-white"
+                      >
+                        <FaWhatsapp className="h-4 w-4" /> Ask about availability
+                      </a>
                     </div>
-                    <a
-                      href={`https://wa.me/${WHATSAPP_CONFIG.number}?text=Hi%20Moda%20Wrld,%20is%20${encodeURIComponent(selectedProduct.name)}%20available?`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full bg-green-500 text-white font-bold py-3 uppercase tracking-widest rounded-lg flex items-center justify-center gap-2 hover:scale-105 transition-transform text-sm"
-                    >
-                      <FaWhatsapp /> Check Availability
-                    </a>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {/* Size Selection */}
-                    <div>
-                      <label className="block text-xs font-bold text-gray-700 mb-2 uppercase tracking-wider">
-                        Select Size
-                      </label>
+                  ) : (
+                    <>
+                      <div className="mb-2 flex items-baseline justify-between">
+                        <span className="text-xs font-bold uppercase tracking-[0.15em] text-black">
+                          Size
+                        </span>
+                        {sizeError && (
+                          <span role="alert" className="text-xs text-red-600">
+                            Select a size
+                          </span>
+                        )}
+                      </div>
                       <div className="flex flex-wrap gap-2">
-                        {selectedProduct.sizes.map((size) => (
+                        {(p.sizes || []).map((size) => (
                           <button
                             key={size}
-                            onClick={() => setSelectedSize(size)}
-                            className={`
-                              px-4 py-2 border rounded text-sm font-medium transition-all
-                              ${
-                                selectedSize === size
-                                  ? 'bg-red-500 text-white border-red-500'
-                                  : 'border-gray-300 hover:border-red-500 hover:text-red-500'
-                              }
-                            `}
+                            type="button"
+                            onClick={() => {
+                              setSelectedSize(size);
+                              setSizeError(false);
+                            }}
+                            aria-pressed={selectedSize === size}
+                            className={`h-11 min-w-[44px] border px-3 text-sm font-medium transition-colors ${
+                              selectedSize === size
+                                ? 'border-black bg-black text-white'
+                                : 'border-neutral-300 text-neutral-800 hover:border-black'
+                            }`}
                           >
                             {size}
                           </button>
                         ))}
                       </div>
-                    </div>
 
-                    {/* Add to Cart Button */}
-                    <button
-                      onClick={handleAddToCart}
-                      className="w-full bg-black text-white font-bold py-3 md:py-4 uppercase tracking-widest hover:bg-red-500 transition-all duration-300 shadow-lg rounded-lg"
-                    >
-                      Add to Cart
-                    </button>
-                  </div>
-                )}
+                      <button
+                        type="button"
+                        onClick={handleAddToCart}
+                        className="mt-5 w-full bg-black py-4 text-xs font-bold uppercase tracking-[0.15em] text-white transition-opacity hover:opacity-85 active:scale-[0.99]"
+                      >
+                        Add to cart
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                <Link
+                  to={`/product/${p.id}`}
+                  onClick={closeProductModal}
+                  className="mt-5 w-fit text-xs font-semibold uppercase tracking-[0.12em] text-black underline underline-offset-4 hover:opacity-60"
+                >
+                  View full details
+                </Link>
               </div>
             </div>
           </motion.div>

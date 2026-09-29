@@ -1,26 +1,14 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import {
-  FiPlus,
-  FiMinus,
-  FiTrash2,
-  FiShoppingBag,
-  FiArrowLeft,
-  FiTruck,
-  FiShield,
-} from 'react-icons/fi';
+import { FiPlus, FiMinus, FiTrash2, FiShoppingBag, FiArrowLeft } from 'react-icons/fi';
 import { useCart } from '../context/CartContext';
 import { formatCurrency } from '../utils/helpers';
 import { PRODUCTS } from '../utils/constants';
 
+const heading = 'font-black uppercase tracking-tight';
+
 const Cart = () => {
-  const {
-    cart,
-    updateQuantity,
-    removeFromCart,
-    clearCart,
-    cartCount,
-  } = useCart();
+  const { cart, updateQuantity, removeFromCart, clearCart, cartCount } = useCart();
   const navigate = useNavigate();
 
   // Total with original prices
@@ -33,27 +21,21 @@ const Cart = () => {
   const FREE_DELIVERY_THRESHOLD = 50000;
   const remainingForFree = FREE_DELIVERY_THRESHOLD - cartTotalOriginal;
   const isEligibleForFreeDelivery = cartTotalOriginal >= FREE_DELIVERY_THRESHOLD;
-  const progressPercent = Math.min(
-    (cartTotalOriginal / FREE_DELIVERY_THRESHOLD) * 100,
-    100
-  );
+  const progressPercent = Math.min((cartTotalOriginal / FREE_DELIVERY_THRESHOLD) * 100, 100);
 
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen pt-28 pb-20 bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen pt-28 pb-20 bg-white flex items-center justify-center">
         <div className="text-center px-4 max-w-md">
-          <FiShoppingBag className="text-7xl text-gray-300 mx-auto mb-6" />
-          <h1 className="font-serif text-3xl font-bold text-gray-900 mb-3">
-            Your cart is empty
-          </h1>
+          <h1 className={`${heading} text-4xl text-black mb-3`}>Your cart is empty</h1>
           <p className="text-gray-500 mb-8">
-            Looks like you haven’t added anything yet. Explore our latest drops.
+            Nothing here yet. From the streets of Lagos to your wardrobe, start with the latest drop.
           </p>
           <Link
             to="/shop"
-            className="inline-flex items-center gap-2 bg-black text-white px-8 py-4 rounded-xl font-bold hover:bg-red-500 transition-all shadow-md"
+            className="inline-flex items-center gap-2 bg-black text-white px-10 py-4 font-bold uppercase tracking-widest text-sm hover:bg-[#FF4F9A] hover:text-black transition-colors"
           >
-            <FiShoppingBag /> Continue Shopping
+            <FiShoppingBag /> Shop Now
           </Link>
         </div>
       </div>
@@ -61,141 +43,92 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-20 bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Page Header */}
-        <div className="mb-10">
-          <nav className="flex items-center text-sm text-gray-500 mb-4">
-            <Link to="/" className="hover:text-red-500 transition-colors">
-              Home
-            </Link>
-            <span className="mx-2">/</span>
-            <span className="text-gray-900 font-medium">Cart</span>
-          </nav>
-          <h1 className="font-serif text-4xl md:text-5xl font-bold text-gray-900">
-            Your Cart
-          </h1>
-          <p className="text-gray-500 mt-2">
+    <div className="min-h-screen pt-24 pb-20 bg-white">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-10 flex items-end justify-between border-b border-black pb-5">
+          <h1 className={`${heading} text-4xl md:text-6xl text-black leading-none`}>Your cart</h1>
+          <p className="text-sm font-bold uppercase tracking-widest text-gray-500">
             {cartCount} {cartCount === 1 ? 'item' : 'items'}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-14">
+          {/* Items */}
+          <div className="lg:col-span-2">
             {/* Free delivery progress */}
-            <div
-              className={`rounded-2xl p-5 border ${
-                isEligibleForFreeDelivery
-                  ? 'bg-green-50 border-green-200'
-                  : 'bg-blue-50 border-blue-200'
-              }`}
-            >
+            <div className={`p-5 mb-8 ${isEligibleForFreeDelivery ? 'bg-[#FF4F9A]' : 'border border-black'}`}>
               {isEligibleForFreeDelivery ? (
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl">🎉</span>
-                  <div>
-                    <p className="text-green-800 font-medium">
-                      You qualify for <strong>free delivery</strong>!
-                    </p>
-                    <p className="text-green-700 text-sm">Your order ships free.</p>
-                  </div>
-                </div>
+                <p className="font-black uppercase tracking-tight text-black">
+                  Free delivery unlocked. Your order ships on us.
+                </p>
               ) : (
                 <>
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="text-2xl">🚚</span>
-                    <div>
-                      <p className="text-blue-800 font-medium">
-                        Add {formatCurrency(remainingForFree)} more for{' '}
-                        <strong>free delivery</strong>
-                      </p>
-                    </div>
-                  </div>
-                  <div className="w-full bg-blue-200 rounded-full h-3 mb-2">
+                  <p className="text-sm text-black mb-3">
+                    Add <strong>{formatCurrency(remainingForFree)}</strong> more for free delivery
+                  </p>
+                  <div className="w-full bg-gray-200 h-2">
                     <div
-                      className="bg-blue-600 rounded-full h-3 transition-all duration-500"
+                      className="bg-black h-2 transition-all duration-500"
                       style={{ width: `${progressPercent}%` }}
                     />
                   </div>
-                  <p className="text-blue-600 text-sm text-right font-medium">
-                    {Math.round(progressPercent)}% to free delivery
-                  </p>
                 </>
               )}
             </div>
 
-            {/* Items list */}
-            <ul className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-100">
+            <ul className="divide-y divide-gray-200 border-y border-gray-200">
               {cart.map((item) => {
                 const product = PRODUCTS.find((p) => p.id === item.id);
                 const price = product?.originalPrice || item.price;
 
                 return (
-                  <li
-                    key={`${item.id}-${item.size}`}
-                    className="flex gap-4 sm:gap-6 p-4 sm:p-6"
-                  >
-                    {/* Image */}
-                    <div className="w-24 h-32 sm:w-28 sm:h-36 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
+                  <li key={`${item.id}-${item.size}`} className="flex gap-4 sm:gap-6 py-6">
+                    <div className="w-24 h-32 sm:w-28 sm:h-36 bg-gray-100 shrink-0 overflow-hidden">
+                      <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                     </div>
 
-                    {/* Details */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-serif font-bold text-gray-900 text-base sm:text-lg truncate pr-2">
-                            {item.name}
-                          </h3>
+                    <div className="flex-1 min-w-0 flex flex-col">
+                      <div className="flex justify-between items-start gap-3">
+                        <div className="min-w-0">
+                          <h3 className={`${heading} text-base sm:text-lg text-black truncate`}>{item.name}</h3>
                           {item.size && (
-                            <span className="inline-block mt-1 text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                              Size: {item.size}
-                            </span>
+                            <p className="mt-1 text-xs font-bold uppercase tracking-widest text-gray-500">
+                              Size {item.size}
+                            </p>
                           )}
                         </div>
                         <button
                           onClick={() => removeFromCart(item.id, item.size)}
-                          className="text-gray-400 hover:text-red-500 p-2 transition-colors"
+                          className="text-gray-400 hover:text-black p-1 transition-colors"
                           title="Remove"
+                          aria-label={`Remove ${item.name}`}
                         >
                           <FiTrash2 className="text-lg" />
                         </button>
                       </div>
 
-                      <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                        {/* Quantity */}
-                        <div className="flex items-center border border-gray-200 rounded-lg w-fit">
+                      <div className="mt-auto pt-4 flex items-center justify-between gap-3">
+                        <div className="flex items-center border border-black w-fit">
                           <button
-                            onClick={() =>
-                              updateQuantity(item.id, item.size, -1)
-                            }
+                            onClick={() => updateQuantity(item.id, item.size, -1)}
                             disabled={item.quantity <= 1}
-                            className="w-9 h-9 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-40"
+                            className="w-9 h-9 flex items-center justify-center hover:bg-black hover:text-white transition-colors disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-black"
+                            aria-label="Decrease quantity"
                           >
                             <FiMinus className="text-sm" />
                           </button>
-                          <span className="w-10 text-center text-sm font-medium">
-                            {item.quantity}
-                          </span>
+                          <span className="w-10 text-center text-sm font-bold">{item.quantity}</span>
                           <button
-                            onClick={() =>
-                              updateQuantity(item.id, item.size, 1)
-                            }
-                            className="w-9 h-9 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition-colors"
+                            onClick={() => updateQuantity(item.id, item.size, 1)}
+                            className="w-9 h-9 flex items-center justify-center hover:bg-black hover:text-white transition-colors"
+                            aria-label="Increase quantity"
                           >
                             <FiPlus className="text-sm" />
                           </button>
                         </div>
 
-                        {/* Price */}
-                        <p className="text-lg font-bold text-gray-900">
-                          {formatCurrency(price * item.quantity)}
-                        </p>
+                        <p className="text-lg font-black text-black">{formatCurrency(price * item.quantity)}</p>
                       </div>
                     </div>
                   </li>
@@ -203,76 +136,54 @@ const Cart = () => {
               })}
             </ul>
 
-            {/* Clear cart / continue shopping */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex items-center justify-between mt-6">
               <Link
                 to="/shop"
-                className="flex items-center justify-center gap-2 text-gray-600 hover:text-black transition-colors font-medium"
+                className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-black hover:text-[#FF4F9A] transition-colors"
               >
-                <FiArrowLeft /> Continue Shopping
+                <FiArrowLeft /> Continue shopping
               </Link>
               <button
                 onClick={clearCart}
-                className="text-red-500 hover:text-red-600 font-medium ml-auto"
+                className="text-sm font-bold uppercase tracking-widest text-gray-500 underline underline-offset-4 hover:text-black transition-colors"
               >
-                Clear Cart
+                Clear cart
               </button>
             </div>
           </div>
 
-          {/* Order Summary Sidebar */}
+          {/* Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sticky top-28">
-              <h2 className="font-serif text-xl font-bold text-gray-900 mb-6">
-                Order Summary
-              </h2>
+            <div className="bg-black text-white p-6 sm:p-8 lg:sticky lg:top-28">
+              <h2 className={`${heading} text-xl mb-6`}>Order summary</h2>
 
-              <div className="space-y-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Subtotal</span>
-                  <span className="font-medium text-gray-900">
-                    {formatCurrency(cartTotalOriginal)}
+              <div className="space-y-4 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Subtotal</span>
+                  <span className="font-semibold">{formatCurrency(cartTotalOriginal)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Delivery</span>
+                  <span className={isEligibleForFreeDelivery ? 'text-[#FF4F9A] font-bold' : 'text-gray-400'}>
+                    {isEligibleForFreeDelivery ? 'Free' : 'Calculated at checkout'}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Delivery</span>
-                  <span
-                    className={
-                      isEligibleForFreeDelivery
-                        ? 'text-green-600 font-medium'
-                        : 'text-gray-500'
-                    }
-                  >
-                    {isEligibleForFreeDelivery
-                      ? 'Free'
-                      : 'Calculated at checkout'}
-                  </span>
-                </div>
-                <hr className="border-gray-200" />
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Total</span>
-                  <span className="text-red-500">
-                    {formatCurrency(cartTotalOriginal)}
-                  </span>
+                <div className="flex justify-between text-lg font-black pt-4 border-t border-neutral-700">
+                  <span className="uppercase">Total</span>
+                  <span>{formatCurrency(cartTotalOriginal)}</span>
                 </div>
               </div>
 
               <button
                 onClick={() => navigate('/checkout')}
-                className="mt-6 w-full bg-black text-white py-4 rounded-xl font-bold uppercase tracking-wider hover:bg-red-500 transition-all duration-300 flex items-center justify-center gap-2 shadow-md"
+                className="mt-8 w-full bg-white text-black py-4 font-bold uppercase tracking-widest text-sm hover:bg-[#FF4F9A] transition-colors"
               >
-                <FiShoppingBag className="text-lg" />
-                Proceed to Checkout
+                Checkout
               </button>
 
-              <div className="mt-6 flex items-center gap-4 text-xs text-gray-400 justify-center">
-                <span className="flex items-center gap-1">
-                  <FiShield className="text-sm" /> Secure Payment
-                </span>
-                <span className="flex items-center gap-1">
-                  <FiTruck className="text-sm" /> Fast Delivery
-                </span>
-              </div>
+              <p className="mt-5 text-xs text-gray-400 text-center">
+                Secure payment by Paystack. Delivery across Nigeria.
+              </p>
             </div>
           </div>
         </div>

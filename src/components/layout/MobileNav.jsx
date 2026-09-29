@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { FiHome, FiGrid, FiShoppingBag, FiUser } from 'react-icons/fi';
+import { Home, Grid3x3, ShoppingBag, User } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 
@@ -30,60 +30,84 @@ const MobileNav = () => {
     }
   };
 
+  const tabClass = (active) =>
+    `flex flex-col items-center justify-center w-1/4 h-full transition-colors ${
+      active ? 'text-black' : 'text-neutral-400 hover:text-neutral-700'
+    }`;
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
-      {/* Main bottom bar – dark glass */}
-      <div className="relative flex justify-around items-center h-16 bg-black/90 backdrop-blur-lg border-t border-white/10 shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
+    <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden">
+      {/* Main bottom bar – white glass */}
+      <div className="relative flex justify-around items-center h-16 bg-white/95 backdrop-blur-lg border-t border-neutral-200 shadow-[0_-8px_30px_rgba(0,0,0,0.06)]">
+
         {/* Home */}
-        <Link
-          to="/"
-          className={`flex flex-col items-center justify-center w-1/4 h-full transition-colors ${
-            isActive('/') ? 'text-red-500' : 'text-white/50 hover:text-white'
-          }`}
-        >
-          <FiHome className="text-xl mb-0.5" />
-          <span className="text-[10px] uppercase tracking-wider font-medium">Home</span>
+        <Link to="/" className={tabClass(isActive('/'))}>
+          <Home className="h-5 w-5 mb-0.5" strokeWidth={isActive('/') ? 2.2 : 1.6} />
+          <span className="text-[10px] uppercase tracking-wider font-medium">
+            Home
+          </span>
         </Link>
 
-        {/* Shop (now with distinct grid icon) */}
-        <Link
-          to="/shop"
-          className={`flex flex-col items-center justify-center w-1/4 h-full transition-colors ${
-            isActive('/shop') ? 'text-red-500' : 'text-white/50 hover:text-white'
-          }`}
-        >
-          <FiGrid className="text-xl mb-0.5" />
-          <span className="text-[10px] uppercase tracking-wider font-medium">Shop</span>
+        {/* Shop */}
+        <Link to="/shop" className={tabClass(isActive('/shop'))}>
+          <Grid3x3 className="h-5 w-5 mb-0.5" strokeWidth={isActive('/shop') ? 2.2 : 1.6} />
+          <span className="text-[10px] uppercase tracking-wider font-medium">
+            Shop
+          </span>
         </Link>
 
-        {/* Empty spacer for the floating cart button */}
+        {/* Spacer for floating cart */}
         <div className="w-1/4 h-full" />
 
         {/* Account */}
         <button
           onClick={handleAccountClick}
-          className={`flex flex-col items-center justify-center w-1/4 h-full transition-colors ${
-            isActive('/profile') || isActive('/login')
-              ? 'text-red-500'
-              : 'text-white/50 hover:text-white'
-          }`}
+          className={tabClass(isActive('/profile') || isActive('/login'))}
         >
-          <FiUser className="text-xl mb-0.5" />
+          <User
+            className="h-5 w-5 mb-0.5"
+            strokeWidth={
+              isActive('/profile') || isActive('/login') ? 2.2 : 1.6
+            }
+          />
           <span className="text-[10px] uppercase tracking-wider font-medium">
             {user ? 'Account' : 'Login'}
           </span>
         </button>
       </div>
 
-      {/* Floating Cart Button – centered, raised, with a glow */}
+      {/* Floating Cart Button – centered, raised, black */}
       <button
         onClick={handleCartClick}
-        className="absolute left-1/2 -translate-x-1/2 -top-6 w-16 h-16 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-red-500/40 active:scale-95 transition-transform border-[3px] border-black/90"
+        aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : 'Cart, empty'}
+        className="
+          absolute left-1/2 -translate-x-1/2 -top-6
+          w-16 h-16
+          bg-black text-white
+          rounded-full
+          flex items-center justify-center
+          shadow-[0_8px_30px_rgba(0,0,0,0.25)]
+          active:scale-95
+          transition-transform
+          border-[3px] border-white
+        "
       >
-        <FiShoppingBag className="text-2xl" />
+        <ShoppingBag className="h-6 w-6" strokeWidth={1.8} />
+
         {cartCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-red-500 text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-black/90 shadow">
-            {cartCount}
+          <span
+            aria-hidden="true"
+            className="
+              absolute -top-1 -right-1
+              min-w-[20px] h-5 px-1
+              bg-white text-black
+              text-[10px] font-bold
+              rounded-full
+              flex items-center justify-center
+              border-2 border-black
+            "
+          >
+            {cartCount > 99 ? '99+' : cartCount}
           </span>
         )}
       </button>
